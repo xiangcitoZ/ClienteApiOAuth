@@ -14,6 +14,11 @@ Console.WriteLine("Password");
 string pass = Console.ReadLine();
 string response = await GetToken(user, pass);
 Console.WriteLine(response);
+Console.WriteLine("Realizando peticion");
+Console.WriteLine("--------------");
+string data = await GetEmpleadosAsync(response);
+Console.WriteLine(data);
+
 Console.WriteLine("Fin de Programa");
 
 
@@ -51,3 +56,33 @@ static async Task<string> GetToken(string user, string pass)
     }
 
 }
+
+
+static async Task<string> GetEmpleadosAsync(string token)
+{
+    string urlApi = "https://apioauthempleados2023xzx.azurewebsites.net";
+    using(HttpClient client = new HttpClient()) 
+    {
+        string request = "/api/empleados";
+        client.BaseAddress = new Uri(urlApi);
+        client.DefaultRequestHeaders.Clear();
+        client.DefaultRequestHeaders.Accept.Add
+            (new MediaTypeWithQualityHeaderValue("application/json"));
+
+        client.DefaultRequestHeaders.Add("Authorization", "bearer " + token);
+        HttpResponseMessage response =
+            await client.GetAsync(request);
+
+        if(response.IsSuccessStatusCode)
+        {
+            string data = await response.Content.ReadAsStringAsync();
+            return data;
+        }
+        else
+        {
+            return "Algo ha ido mal ..." + response.StatusCode;
+        }
+
+    }
+}
+
